@@ -1,3 +1,4 @@
+import re
 import unicodedata
 import streamlit as st
 from langchain.schema import HumanMessage
@@ -33,6 +34,25 @@ def _pick_retriever(mode: str | None):  # modeに応じた retriever を返す
     if mode in retrievers:  # modeに応じた retriever を返す
         return retrievers[mode]  # modeに応じた retriever を返す
     return retrievers.get("all")  # それ以外は 'all' を返す
+
+
+def extract_department_keywords(user_message):
+    """学部・学科名を動的に抽出"""
+    # 学部・学科のパターンを検索
+    patterns = [
+        r'(\w+学部)',      # ○○学部
+        r'(\w+学科)',      # ○○学科
+        r'(\w+科)',        # ○○科
+        r'(\w+専攻)',      # ○○専攻
+    ]
+
+    keywords = []
+    for pattern in patterns:
+        matches = re.findall(pattern, user_message)
+        keywords.extend(matches)
+
+    # 見つかったキーワードがあれば最初のものを使用、なければ元の文章
+    return keywords[0] if keywords else user_message
 
 
 def get_llm_response(user_message: str, mode: str | None = None):  # LLMの応答を取得
@@ -134,3 +154,50 @@ def get_llm_response(user_message: str, mode: str | None = None):  # LLMの応�
         if logger:  # ログ出力
             logger.error(f"LLM単体回答エラー: {e}")  # エラーログ出力
         return {"answer": ""}  # 空応答を返す
+
+
+def get_llm_response_v2(user_message: str, mode: str | None = None):  # LLMの応答を取得（改良版）
+    """
+    改良版RAGチェーン：学部・学科名を抽出してから検索
+    """
+    llm = ChatOpenAI(model_name=cf.MODEL_NAME, temperature=cf.TEMPERATURE)
+    logger = st.session_state.get("logger")
+
+    # 1. まず学部・学科名を抽出して検索
+    department_keyword = extract_department_keywords(user_message)
+    related_docs = []
+    if st.session_state.get("retriever") is not None:
+        related_docs = st.session_state.retriever.get_relevant_documents(
+            department_keyword)
+
+        # 2. 結果が少なければ元の文章でも検索
+        if len(related_docs) < 2:
+            additional_docs = st.session_state.retriever.get_relevant_documents(
+                user_message)
+            related_docs.extend(additional_docs)
+
+    # 重複除去
+    unique_docs = list(
+        {doc.page_content: doc for doc in related_docs}.values())
+
+    # 3. 文脈を文字列に変換
+    context = "\n\n".join([doc.page_content for doc in unique_docs])
+
+    # 4. プロンプトを作成
+    prompt = f"""
+    あなたは教育機関向けの学内情報アシスタントです。
+    以下の文脈に基づいて、ユーザーの質問にできるだけ関連する内容を答えてください。
+    関連情報が見つからない場合のみ「該当情報がありません」と返してください。
+
+    【文脈】
+    {context}
+
+    【質問】
+    {user_message}
+
+    【回答】
+    """
+
+    # 5. LLMに送信
+    response = llm.invoke(prompt)
+    return {"answer": response.content}
