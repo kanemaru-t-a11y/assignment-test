@@ -13,4 +13,5 @@ docx2txt                  # docxローダー
 pypdf                      # PDFローダー
 python-docx                # docxローダー
 pandas                     # CSVローダー
-
+python-dotenv==1.0.1      # 追加（APIキー管理）
+numpy                      # 追加（数値計算）
