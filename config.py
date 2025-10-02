@@ -22,7 +22,7 @@ APP_START_MESSAGE = "アプリが正常に起動しました。"
 # LLM
 MODEL_NAME = "gpt-4o-mini"
 MAX_TOKENS = 100
-TOP_K = 8                 # まとめ系に効くよう広めに
+TOP_K = 15                 # まとめ系に効くよう広めに
 TEMPERATURE = 0.5
 VECTORSTORE_DIR = "./vectorstore"
 EMBEDDING_MODEL_NAME = "text-embedding-ada-002"

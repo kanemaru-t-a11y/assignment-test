@@ -1,17 +1,16 @@
-chromadb                    # ChromaベクトルDB
-pymupdf                     # PDFローダー（PyMuPDF）
-openai==1.60.2            # OpenAI API呼び出し
-streamlit==1.41.1         # 入力型Webアプリ
-python-dotenv==1.0.1      # APIキー管理
-tiktoken==0.8.0           # トークン計算 / トークナイズ
-rich==13.9.4              # ログ表示
-langchain==0.3.7          # LLMラッパー
-langchain-openai==0.2.8   # OpenAIラッパー
-langchain-community==0.3.5 # コミュニティ
-langchain-text-splitters==0.3.2 # テキスト分割
-docx2txt                  # docxローダー
-pypdf                      # PDFローダー
-python-docx                # docxローダー
-pandas                     # CSVローダー
-python-dotenv==1.0.1      # 追加（APIキー管理）
-numpy                      # 追加（数値計算）
+chromadb
+pymupdf
+openai==1.60.2
+streamlit==1.41.1
+python-dotenv==1.0.1
+tiktoken==0.8.0
+rich==13.9.4
+langchain==0.3.7
+langchain-openai==0.2.8
+langchain-community==0.3.5
+langchain-text-splitters==0.3.2
+docx2txt
+pypdf
+python-docx
+pandas
+numpy
